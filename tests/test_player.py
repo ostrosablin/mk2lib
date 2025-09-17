@@ -53,7 +53,9 @@ def sample_landmarks():
     """
     return DECK_LANDMARKS[:3]
 
+
 # --- Tests ---
+
 
 def test_initial_state(player):
     """

@@ -203,7 +203,9 @@ def test_take_coin_for_each_establishment(game_2p: MachiKoroGame):
     """
     Check that calculation of "coin for each card of category" is correct.
     """
-    card = get_card_from_deck(DECK_LANDMARKS, "publisher")  # TakeCoinForEachEstablishment
+    card = get_card_from_deck(
+        DECK_LANDMARKS, "publisher"
+    )  # TakeCoinForEachEstablishment
     victim_card = get_card_from_deck(DECK_1_6, "convenience_store")
     game_2p.current_player = 1
     for _ in range(3):
@@ -222,7 +224,7 @@ def test_take_coins_for_each_landmark(game_4p: MachiKoroGame):
     """
     Check that calculation of "coins for each landmark" is correct".
     """
-    card = get_card_from_deck(DECK_LANDMARKS , "museum")  # TakeCoinsForEachLandmark
+    card = get_card_from_deck(DECK_LANDMARKS, "museum")  # TakeCoinsForEachLandmark
     lm = get_card_from_deck(DECK_LANDMARKS, "city_hall")
     game_4p.current_player = 1
     game_4p.players[0].landmarks.append(lm)
@@ -247,7 +249,9 @@ def test_take_five_if_two_landmarks(game_2p: MachiKoroGame):
     """
     Check that we correctly take 5 coins from 2 landmark owners.
     """
-    card = get_card_from_deck(DECK_LANDMARKS , "private_club")  # TakeFiveCoinsIfTwoLandmarks
+    card = get_card_from_deck(
+        DECK_LANDMARKS, "private_club"
+    )  # TakeFiveCoinsIfTwoLandmarks
     lm = get_card_from_deck(DECK_LANDMARKS, "city_hall")
     game_2p.current_player = 1
     game_2p.players[0].landmarks = [lm, lm]

@@ -91,8 +91,10 @@ def test_market_initial_deal_and_serialize_deserialize():
     restored = Market.deserialize(game, data)
 
     assert set(market.dealt_low.keys()) == set(restored.dealt_low.keys())
-    assert all(c.quantity == restored.dealt_low[name].quantity
-               for name, c in market.dealt_low.items())
+    assert all(
+        c.quantity == restored.dealt_low[name].quantity
+        for name, c in market.dealt_low.items()
+    )
     #
     assert all(a == b for a, b in zip(market.est_low, restored.est_low))
 
@@ -351,14 +353,13 @@ def test_market_use_promo():
     promo = ["city_hall", "private_club", "renovation_company"]
     market = Market(game, use_promo=False)
     for i in reversed(promo):
-        for c in (market.landmarks + list(market.dealt_landmarks.values())):
+        for c in market.landmarks + list(market.dealt_landmarks.values()):
             if c.name == i:
                 promo.remove(i)
     assert len(promo) == 3
     market = Market(game, use_promo=True)
     for i in reversed(promo):
-        for c in (market.landmarks + list(market.dealt_landmarks.values())):
+        for c in market.landmarks + list(market.dealt_landmarks.values()):
             if c.name == i:
                 promo.remove(i)
     assert not promo
-

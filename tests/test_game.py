@@ -23,9 +23,21 @@ Machi Koro 2 game testcases.
 
 import pytest
 
-from mk2lib.events import GameEnded, NotInGame, OnlyOwnerOperation, NoGameInProgress, \
-    FinalScores, StateSwitch, GameCreated, PlayerJoined, PlayerLeft, TurnSkipped, \
-    TurnBegins, CanBuild, OwnerChanged
+from mk2lib.events import (
+    GameEnded,
+    NotInGame,
+    OnlyOwnerOperation,
+    NoGameInProgress,
+    FinalScores,
+    StateSwitch,
+    GameCreated,
+    PlayerJoined,
+    PlayerLeft,
+    TurnSkipped,
+    TurnBegins,
+    CanBuild,
+    OwnerChanged,
+)
 from mk2lib.game import MachiKoroGame
 
 from mk2lib.cards import Card, Establishment, Landmark
@@ -66,12 +78,12 @@ def test_kick(game: MachiKoroGame):
     game.last_op -= INACTIVITY_TIMEOUT
     assert not game.kick(2, 3)  # Even after timeout cannot kick arbitrary.
     assert isinstance(game.events.get_nowait(), OnlyOwnerOperation)
-    assert game.kick(2,1)  # But can kick owner.
+    assert game.kick(2, 1)  # But can kick owner.
     assert isinstance(game.events.get_nowait(), PlayerLeft)
     assert isinstance(game.events.get_nowait(), GameEnded)
     assert isinstance(game.events.get_nowait(), StateSwitch)
     assert game.state == game.state.CANCELLED
-    assert not game.kick(2,2)  # Can't kick from cancelled game.
+    assert not game.kick(2, 2)  # Can't kick from cancelled game.
     assert isinstance(game.events.get_nowait(), NoGameInProgress)
     game = MachiKoroGame.deserialize(save)
     for i in range(2, 6):
@@ -163,4 +175,3 @@ def test_cancel(game: MachiKoroGame):
     assert game.state == game.state.CANCELLED
     assert isinstance(game.events.get_nowait(), FinalScores)
     assert isinstance(game.events.get_nowait(), StateSwitch)
-

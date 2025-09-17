@@ -82,7 +82,7 @@ def exchange_establishments(game, negative=False):
         game.dont_exchange_establishments()
 
 
-@pytest.mark.parametrize('execution_number,', range(1000))
+@pytest.mark.parametrize("execution_number,", range(1000))
 def test_random_game(game_random, execution_number):
     negative = bool(execution_number % 2)
     g = game_random
@@ -90,7 +90,9 @@ def test_random_game(game_random, execution_number):
         g.start(1, rand_bool(), rand_bool())
         assert g.state.is_in_lobby
     g.join(len(g.players) + 1)
-    if negative and rand_bool():  # Attempt to join sixth player or already joined player
+    if (
+        negative and rand_bool()
+    ):  # Attempt to join sixth player or already joined player
         if len(g.players) == 5:
             g.join(6)
         else:

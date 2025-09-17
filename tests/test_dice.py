@@ -25,6 +25,7 @@ import pytest
 from mk2lib.const import DICE_VALUES
 from mk2lib.dice import Dice
 
+
 def test_dice_roll():
     """
     Test rolling a single dice.
@@ -36,6 +37,7 @@ def test_dice_roll():
     assert not dice.dual
     assert dice.sum == dice.dice
     assert not dice.double
+
 
 def test_dice_dual_roll():
     """
@@ -50,11 +52,15 @@ def test_dice_dual_roll():
     assert dice.sum == (dice.dice + dice.dice2)
     assert dice.double == (dice.dice == dice.dice2)
 
-@pytest.mark.parametrize("d1,d2,expected_dual,expected_double,expected_sum", [
-    (6, None, False, False, 6),
-    (6, 5, True, False, 11),
-    (6, 6, True, True, 12),
-])
+
+@pytest.mark.parametrize(
+    "d1,d2,expected_dual,expected_double,expected_sum",
+    [
+        (6, None, False, False, 6),
+        (6, 5, True, False, 11),
+        (6, 6, True, True, 12),
+    ],
+)
 def test_dice_properties(d1, d2, expected_dual, expected_double, expected_sum):
     """
     Check that properties appropriately represent dice state.
@@ -70,6 +76,7 @@ def test_dice_properties(d1, d2, expected_dual, expected_double, expected_sum):
     assert restored_dice.double == expected_double
     assert restored_dice.sum == expected_sum
 
+
 def test_dice_roll_randomness():
     """
     Check dice range.
@@ -78,6 +85,7 @@ def test_dice_roll_randomness():
         dice = Dice.roll(dual=False)
         assert 1 <= dice.dice <= 6
         assert dice.dice2 is None
+
 
 def test_dice_to_emoji():
     dice = Dice.roll()
