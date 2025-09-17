@@ -28,11 +28,13 @@ from random import randint
 
 from mk2lib.const import DICE_VALUES
 
+
 @dataclass
 class Dice:
     """
     This class is for representing and rolling dice.
     """
+
     dice: int
     dice2: int | None
 
@@ -71,8 +73,8 @@ class Dice:
         :param dual: Whether to roll two dice.
         """
         return Dice(
-            dice = randint(1, 6),
-            dice2 = randint(1, 6) if dual else None,
+            dice=randint(1, 6),
+            dice2=randint(1, 6) if dual else None,
         )
 
     def to_emoji(self) -> list[str]:

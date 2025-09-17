@@ -35,6 +35,7 @@ class Player:
     """
     Class representing a player and their state.
     """
+
     player_id: int
     coins: int = 5
     initial_build_turns: int = 3
@@ -47,9 +48,9 @@ class Player:
     establishments: list[Establishment] = field(default_factory=list)
     landmarks: list[Landmark] = field(default_factory=list)
 
-
-    def get_activated_establishments(self, number: int, order: ActivationOrder) -> list[
-        Establishment]:
+    def get_activated_establishments(
+        self, number: int, order: ActivationOrder
+    ) -> list[Establishment]:
         """
         Return all activated establishments for specified roll and order/color.
 
@@ -114,7 +115,7 @@ class Player:
         for idx in range(len(self.landmarks)):
             if self.landmarks[idx].name == card_name:
                 return self.landmarks.pop(idx)
-        raise KeyError(f"Player doesn't have card \"{card_name}\"")
+        raise KeyError(f'Player doesn\'t have card "{card_name}"')
 
     def count_cards_by_category(self, category: Kind) -> int:
         """
@@ -246,10 +247,11 @@ class Player:
             earned_coins_this_turn=data["earned_coins_this_turn"],
         )
 
-        for card_name in (data["establishments"] + data["landmarks"]):
+        for card_name in data["establishments"] + data["landmarks"]:
             player.add_card(replace(ALL_CARDS[card_name], quantity=1))
 
         return player
+
 
 # Player type definition - either by reference, ID or implicit current player.
 PlayerType: TypeAlias = Player | int | None

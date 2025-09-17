@@ -32,6 +32,7 @@ class ActivationOrder(StrEnum):
     """
     Activation order (that is, color) of Establishment card.
     """
+
     OTHER_TURN = "other_turn"
     ANY_TURN = "any_turn"
     OWN_TURN = "own_turn"
@@ -42,6 +43,7 @@ class Kind(StrEnum):
     """
     Category (symbol) of Establishment card.
     """
+
     FOOD = "food"
     SHOP = "shop"
     GEAR = "gear"
@@ -56,6 +58,7 @@ class LandmarkKind(StrEnum):
     """
     Landmark card kind (color).
     """
+
     ANY_TURN_INFINITE = "any_turn_infinite"
     OWN_TURN_ONCE = "own_turn_once"
     OWN_TURN_INFINITE = "own_turn_infinite"
@@ -66,6 +69,7 @@ class Effect(StrEnum):
     """
     Orange landmark card effects.
     """
+
     SKIP_BUILD_FOR_5_COINS = auto()
     GET_8_COINS_ON_12_ROLL = auto()
     TAKE_2_COINS_ON_DOUBLE = auto()
@@ -94,6 +98,7 @@ class GameState(IntEnum):
     """
     Enum of game states for state machine.
     """
+
     NOT_STARTED = auto()
     ON_ROLL = auto()
     ON_BUILD = auto()
@@ -139,10 +144,10 @@ class GameState(IntEnum):
 
 # Dice faces (string-to-emoji mapping)
 DICE_VALUES = {
-    1: '1️⃣',
-    2: '2️⃣',
-    3: '3️⃣',
-    4: '4️⃣',
-    5: '5️⃣',
-    6: '6️⃣',
+    1: "1️⃣",
+    2: "2️⃣",
+    3: "3️⃣",
+    4: "4️⃣",
+    5: "5️⃣",
+    6: "6️⃣",
 }

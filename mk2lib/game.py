@@ -54,10 +54,22 @@ from .events import (
     AlreadyInGame,
     RoomIsFull,
     PlayerJoined,
-    OnlyOwnerOperation, GameStarted, PlayerHasNoSuchCard, SkipExchangeEstablishments,
-    EstablishmentExchanged, EstablishmentGiven, CannotExchangeWithSelf, NotInGame,
-    NotEnoughPlayers, GameInProgress, GameEnded, NoGameInProgress, FinalScores,
-    PlayerLeft, TurnSkipped, OwnerChanged,
+    OnlyOwnerOperation,
+    GameStarted,
+    PlayerHasNoSuchCard,
+    SkipExchangeEstablishments,
+    EstablishmentExchanged,
+    EstablishmentGiven,
+    CannotExchangeWithSelf,
+    NotInGame,
+    NotEnoughPlayers,
+    GameInProgress,
+    GameEnded,
+    NoGameInProgress,
+    FinalScores,
+    PlayerLeft,
+    TurnSkipped,
+    OwnerChanged,
 )
 from .mk2deck import Market, ALL_CARDS
 from .player import Player, PlayerType
@@ -294,7 +306,7 @@ class MachiKoroGame:
             PlayerLeft(
                 player=target,
                 initiator=initiator,
-                during_game=self.state.is_game_active
+                during_game=self.state.is_game_active,
             )
         )
 
@@ -462,14 +474,14 @@ class MachiKoroGame:
             self._on_six_roll(player)
         if self.dice.double:
             if (
-                    card := self.active_effects.get(Effect.TAKE_2_COINS_ON_DOUBLE)
+                card := self.active_effects.get(Effect.TAKE_2_COINS_ON_DOUBLE)
             ) is not None:
                 TakeFromAllOpponents(2).trigger(self, card, player, player)
         if not player.earned_coins_this_turn:
             self._compensation_no_earn(player)
         if self.dice.double:
             if (
-                    card := self.active_effects.get(Effect.EXTRA_TURN_ON_DOUBLE)
+                card := self.active_effects.get(Effect.EXTRA_TURN_ON_DOUBLE)
             ) is not None:
                 ExtraTurn().trigger(self, card, player, player)
             if self._give_establishment(player):
@@ -508,13 +520,13 @@ class MachiKoroGame:
         current = self._get_current_player()
         for player in self._traverse_backward_red():
             for establishment in player.get_activated_establishments(
-                    roll, ActivationOrder.OTHER_TURN
+                roll, ActivationOrder.OTHER_TURN
             ):
                 establishment.effect.trigger(self, establishment, player, current)
 
         for player in self.traverse_forward_players():
             for establishment in player.get_activated_establishments(
-                    roll, ActivationOrder.ANY_TURN
+                roll, ActivationOrder.ANY_TURN
             ):
                 establishment.effect.trigger(self, establishment, player, current)
 
@@ -522,12 +534,12 @@ class MachiKoroGame:
                 continue
 
             for establishment in player.get_activated_establishments(
-                    roll, ActivationOrder.OWN_TURN
+                roll, ActivationOrder.OWN_TURN
             ):
                 establishment.effect.trigger(self, establishment, player, current)
 
         for establishment in current.get_activated_establishments(
-                roll, ActivationOrder.OWN_TURN_MAJOR
+            roll, ActivationOrder.OWN_TURN_MAJOR
         ):
             establishment.effect.trigger(self, establishment, current, current)
 
@@ -609,9 +621,7 @@ class MachiKoroGame:
             if not player.has_card(card_given, only_establishments=True):
                 self.emit_event(
                     PlayerHasNoSuchCard(
-                        player=player,
-                        card_name=card_given,
-                        current=True
+                        player=player, card_name=card_given, current=True
                     )
                 )
                 return False
@@ -652,11 +662,11 @@ class MachiKoroGame:
         return False
 
     def exchange_establishments(
-            self,
-            player: PlayerType,
-            opponent: PlayerType,
-            card_given: str,
-            card_taken: str,
+        self,
+        player: PlayerType,
+        opponent: PlayerType,
+        card_given: str,
+        card_taken: str,
     ) -> bool:
         """
         Exchange establishments with another player via Business Center effect.
@@ -678,18 +688,14 @@ class MachiKoroGame:
             if not player.has_card(card_given, only_establishments=True):
                 self.emit_event(
                     PlayerHasNoSuchCard(
-                        player=player,
-                        card_name=card_given,
-                        current=True
+                        player=player, card_name=card_given, current=True
                     )
                 )
                 return False
             if not opponent.has_card(card_taken, only_establishments=True):
                 self.emit_event(
                     PlayerHasNoSuchCard(
-                        player=opponent,
-                        card_name=card_taken,
-                        current=False
+                        player=opponent, card_name=card_taken, current=False
                     )
                 )
                 return False
@@ -732,8 +738,12 @@ class MachiKoroGame:
             self.emit_event(DiceRolled(player, self.dice))
             self._activate_establishments(self.dice.sum)
             if player.exchange_establishments:
-                if any((p.establishments for p in
-                        self.traverse_forward_players(skipcurrent=True))):
+                if any(
+                    (
+                        p.establishments
+                        for p in self.traverse_forward_players(skipcurrent=True)
+                    )
+                ):
                     self._switch_state(GameState.ON_ESTABLISHMENT_EXCHANGE)
                     return True
             if self._activate_landmarks(player):
@@ -777,8 +787,9 @@ class MachiKoroGame:
                 return True
         return False
 
-    def start(self, player: PlayerType, use_promo: bool = True,
-              randomize_players: bool = True) -> bool:
+    def start(
+        self, player: PlayerType, use_promo: bool = True, randomize_players: bool = True
+    ) -> bool:
         """
         Start game when lobby is ready.
 
@@ -802,12 +813,14 @@ class MachiKoroGame:
             self.randomize_players = randomize_players
             if randomize_players:
                 random.shuffle(self.players)
-            self.emit_event(GameStarted(
-                owner=self._get_owner(),
-                turn_order=self.players,
-                use_promo=use_promo,
-                randomize_players=randomize_players,
-            ))
+            self.emit_event(
+                GameStarted(
+                    owner=self._get_owner(),
+                    turn_order=self.players,
+                    use_promo=use_promo,
+                    randomize_players=randomize_players,
+                )
+            )
             self.market = Market(self, use_promo=use_promo)
             self._switch_turn(no_advance=True)
             return True
@@ -944,7 +957,7 @@ class MachiKoroGame:
         sorted_players = sorted(
             self.players,
             key=lambda x: (x.is_winner(), len(x.landmarks), x.coins),
-            reverse=True
+            reverse=True,
         )
 
         places = {}
@@ -980,9 +993,7 @@ class MachiKoroGame:
             "dice": None if self.dice is None else self.dice.serialize(),
             "last_op": self.last_op,
             # Event bus state is not captured
-            "active_effects": {
-                str(k): v.name for k, v in self.active_effects.items()
-            },
+            "active_effects": {str(k): v.name for k, v in self.active_effects.items()},
         }
 
     @classmethod

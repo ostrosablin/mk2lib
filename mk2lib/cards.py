@@ -40,6 +40,7 @@ class Card(ABC):
     """
     Base card class with common fields.
     """
+
     name: str  # Enterprise type
     effect: CardEffect  # Effect of this card
     quantity: int  # Number of cards of that type
@@ -61,6 +62,7 @@ class Card(ABC):
 @dataclass
 class Establishment(Card):
     """Represents an Establishment card in Machi Koro 2."""
+
     activation_numbers: list[int]  # Numbers that this establishment activate on
     cost: int  # Price of this establishment to build
     category: Kind  # Category of this card
@@ -82,6 +84,7 @@ class Establishment(Card):
 @dataclass
 class Landmark(Card):
     """Represents a Landmark card in Machi Koro 2."""
+
     cost: list[int | None]  # List of prices to buy this card for each landmark count
     is_promo: bool  # Whether this card is a part of promo addon
     kind: LandmarkKind  # Kind (and color) of this landmark

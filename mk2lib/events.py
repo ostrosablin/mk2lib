@@ -37,6 +37,7 @@ class Event:
     """
     Base class for all Events.
     """
+
     pass
 
 
@@ -45,6 +46,7 @@ class GameCreated(Event):
     """
     New game is created.
     """
+
     owner: Player
 
 
@@ -53,6 +55,7 @@ class GameStarted(Event):
     """
     New game is created.
     """
+
     owner: Player
     turn_order: list[Player]
     use_promo: bool
@@ -64,6 +67,7 @@ class PlayerJoined(Event):
     """
     Player has joined game.
     """
+
     player: Player
 
 
@@ -72,6 +76,7 @@ class PlayerLeft(Event):
     """
     Player has left game.
     """
+
     player: Player
     initiator: Player
     during_game: bool = False
@@ -82,6 +87,7 @@ class DiceRolled(Event):
     """
     Player rolls dice.
     """
+
     player: Player
     dice: Dice
 
@@ -91,6 +97,7 @@ class StateSwitch(Event):
     """
     Game state changes from A to B.
     """
+
     prev_state: GameState
     new_state: GameState
 
@@ -100,6 +107,7 @@ class MoneyTaken(Event):
     """
     Player A takes money from player B (possibly not in full amount, if any).
     """
+
     reason: Card
     from_user: Player
     to_user: Player
@@ -112,6 +120,7 @@ class MoneyEarned(Event):
     """
     Player gets money from bank.
     """
+
     reason: Card
     user: Player
     earned: int
@@ -122,6 +131,7 @@ class MoneyDivided(Event):
     """
     Money was evenly distributed among the players (possibly rounding up from bank).
     """
+
     reason: Card
     players: int
     total_coins: int
@@ -134,6 +144,7 @@ class GetOneCoinBecauseHadNoMoney(Event):
     """
     At the start of build phase, player received 1 coin, because he had none.
     """
+
     user: Player
 
 
@@ -142,6 +153,7 @@ class TurnBegins(Event):
     """
     Next turn begins.
     """
+
     extra: bool
     turn_number: int
     round_number: int
@@ -154,6 +166,7 @@ class TurnSkipped(Event):
     """
     Player skips turn.
     """
+
     player: Player
 
 
@@ -162,6 +175,7 @@ class DealtCardsToMarket(Event):
     """
     New cards were dealt to market.
     """
+
     cards: list[Card] = field(default_factory=list)
     initial: bool = False
 
@@ -171,6 +185,7 @@ class CardBuilt(Event):
     """
     Player has built a new card.
     """
+
     buyer: Player
     card: Card
     price_paid: int
@@ -181,6 +196,7 @@ class SkipBuild(Event):
     """
     Player skips the build phase.
     """
+
     player: Player
     cannot_buy: bool = False
 
@@ -190,6 +206,7 @@ class CanBuild(Event):
     """
     Player can build something in build phase.
     """
+
     player: Player
     build_options: list[Card]
 
@@ -199,6 +216,7 @@ class GetExtraTurn(Event):
     """
     Player gets an extra turn.
     """
+
     player: Player
     no_effect: bool
 
@@ -208,6 +226,7 @@ class NewLandmarkEffectActivated(Event):
     """
     New landmark effect activates.
     """
+
     landmark: Landmark
     builder_only: bool = False
 
@@ -217,6 +236,7 @@ class MustGiveEstablishment(Event):
     """
     Player must give some establishment to previous player.
     """
+
     from_user: Player
     to_user: Player
 
@@ -226,6 +246,7 @@ class CanExchangeEstablishments(Event):
     """
     Player can exchange establishments with another player.
     """
+
     player: Player
 
 
@@ -234,6 +255,7 @@ class SkipExchangeEstablishments(Event):
     """
     Player has decided not to exchange establishments.
     """
+
     player: Player
 
 
@@ -242,6 +264,7 @@ class CannotExchangeWithSelf(Event):
     """
     Player has attempted to exchange establishments with self.
     """
+
     player: Player
 
 
@@ -250,6 +273,7 @@ class EstablishmentGiven(Event):
     """
     Establishment was given to player.
     """
+
     from_user: Player
     to_user: Player
     establishment: Establishment
@@ -260,6 +284,7 @@ class EstablishmentExchanged(Event):
     """
     Players have exchanged establishments.
     """
+
     from_user: Player
     to_user: Player
     establishment_given: Establishment
@@ -271,14 +296,17 @@ class OwnerChanged(Event):
     """
     Old owner left a game in progress.
     """
+
     oldowner: Player
     newowner: Player
+
 
 @dataclass(frozen=True)
 class GameEnded(Event):
     """
     Game finished.
     """
+
     player: Player
     finished: bool = False
     launch_pad: bool = False
@@ -292,6 +320,7 @@ class FinalScores(Event):
     """
     Scores at the time of game end.
     """
+
     scores: dict[int, list[Player]]
     finished: bool = True
 
@@ -300,6 +329,7 @@ class ErrorEvent(Event):
     """
     Base class for error events.
     """
+
     pass
 
 
@@ -308,6 +338,7 @@ class WrongState(ErrorEvent):
     """
     Emitted when action is attempted in wrong state.
     """
+
     expected_state: GameState
     current_state: GameState
 
@@ -317,6 +348,7 @@ class NotYourTurn(ErrorEvent):
     """
     Emitted when action is attempted during another player's turn.
     """
+
     expected_player: Player
     moved_player: Player
 
@@ -326,6 +358,7 @@ class NotInGame(ErrorEvent):
     """
     Emitted when action is attempted by player who's not in current game.
     """
+
     player_id: int
 
 
@@ -334,6 +367,7 @@ class GameInProgress(ErrorEvent):
     """
     Emitted when action is attempting to join a game in progress.
     """
+
     player_id: int
 
 
@@ -342,6 +376,7 @@ class NoGameInProgress(ErrorEvent):
     """
     Emitted when action is attempted on already finished game.
     """
+
     player: Player
 
 
@@ -353,6 +388,7 @@ class CardUnavailable(ErrorEvent):
     If card is technically available on market, but rules don't allow purchasing
     it - prohibited would be set to True.
     """
+
     buyer: Player
     card_name: str
     prohibited: bool = False
@@ -363,6 +399,7 @@ class NotEnoughMoney(ErrorEvent):
     """
     Emitted on attempt to build a card with insufficient coins.
     """
+
     buyer: Player
     card_name: str
     card_price: int
@@ -373,6 +410,7 @@ class PlayerHasNoSuchCard(ErrorEvent):
     """
     Emitted on attempt to give/take a card that's not in player's possession.
     """
+
     player: Player
     card_name: str
     current: bool
@@ -383,6 +421,7 @@ class AlreadyInGame(ErrorEvent):
     """
     Emitted when player who's already in room tries to join again.
     """
+
     player: Player
 
 
@@ -391,6 +430,7 @@ class RoomIsFull(ErrorEvent):
     """
     Emitted when attempting to join a game with 5 joined players.
     """
+
     player_id: int
 
 
@@ -399,6 +439,7 @@ class NotEnoughPlayers(ErrorEvent):
     """
     Emitted when attempting to start a game with less than 2 players.
     """
+
     player: Player
 
 
@@ -409,6 +450,7 @@ class OnlyOwnerOperation(ErrorEvent):
 
     Also returns inactivity timeout state.
     """
+
     owner: Player
     user: Player
     inactivity_remains: float

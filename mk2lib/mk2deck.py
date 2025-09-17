@@ -29,12 +29,22 @@ from typing import TYPE_CHECKING
 
 from mk2lib.cards import Card, Establishment, Landmark
 from mk2lib.const import ActivationOrder, LandmarkKind, Kind, Effect
-from mk2lib.effects import (EarnFromBank, EarnFromActivePlayer,
-                            EarnFromBankCombo, ExchangeEstablishments,
-                            TakeHalfIfElevenOrMore, TakeFromAllOpponents,
-                            PersistentEffect, ExtraTurn, TakeCoinForEachEstablishment,
-                            BuiltLoanOffice, TakeCoinsForEachLandmark,
-                            EvenlyDistributeCoins, TakeFiveCoinsIfTwoLandmarks, InstaWin)
+from mk2lib.effects import (
+    EarnFromBank,
+    EarnFromActivePlayer,
+    EarnFromBankCombo,
+    ExchangeEstablishments,
+    TakeHalfIfElevenOrMore,
+    TakeFromAllOpponents,
+    PersistentEffect,
+    ExtraTurn,
+    TakeCoinForEachEstablishment,
+    BuiltLoanOffice,
+    TakeCoinsForEachLandmark,
+    EvenlyDistributeCoins,
+    TakeFiveCoinsIfTwoLandmarks,
+    InstaWin,
+)
 from mk2lib.events import CardUnavailable, NotEnoughMoney, DealtCardsToMarket, CardBuilt
 
 if TYPE_CHECKING:
@@ -46,6 +56,7 @@ class Market:
     """
     Implementation of 5-5-5 market of Machi Koro 2.
     """
+
     def __init__(self, game: MachiKoroGame, use_promo: bool = True):
         """
         Create a new Market object, clone and shuffle decks and make an initial deal.
@@ -87,9 +98,9 @@ class Market:
         """
         dealt = []
         for deck, market in (
-                (self.est_low, self.dealt_low),
-                (self.est_high, self.dealt_high),
-                (self.landmarks, self.dealt_landmarks)
+            (self.est_low, self.dealt_low),
+            (self.est_high, self.dealt_high),
+            (self.landmarks, self.dealt_landmarks),
         ):
             while deck and len(market) < 5:
                 card = deck.pop()
@@ -187,10 +198,12 @@ class Market:
             "est_high": [card.name for card in self.est_high],
             "landmarks": [card.name for card in self.landmarks],
             "dealt_low": {name: card.quantity for name, card in self.dealt_low.items()},
-            "dealt_high": {name: card.quantity for name, card in
-                           self.dealt_high.items()},
-            "dealt_landmarks": {name: card.quantity for name, card in
-                                self.dealt_landmarks.items()},
+            "dealt_high": {
+                name: card.quantity for name, card in self.dealt_high.items()
+            },
+            "dealt_landmarks": {
+                name: card.quantity for name, card in self.dealt_landmarks.items()
+            },
         }
 
     @classmethod
@@ -213,8 +226,9 @@ class Market:
 
         # reconstruct dealt dicts (quantities matter!)
         def rebuild_dealt(d):
-            return {name: replace(ALL_CARDS[name], quantity=qty) for name, qty in
-                    d.items()}
+            return {
+                name: replace(ALL_CARDS[name], quantity=qty) for name, qty in d.items()
+            }
 
         market.dealt_low = rebuild_dealt(data["dealt_low"])
         market.dealt_high = rebuild_dealt(data["dealt_high"])

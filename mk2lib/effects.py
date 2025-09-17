@@ -30,8 +30,14 @@ from typing import TYPE_CHECKING
 
 from .cards import Card, Landmark
 from .const import Effect, Kind
-from .events import (MoneyTaken, MoneyEarned, GetExtraTurn, NewLandmarkEffectActivated,
-                     CanExchangeEstablishments, MoneyDivided)
+from .events import (
+    MoneyTaken,
+    MoneyEarned,
+    GetExtraTurn,
+    NewLandmarkEffectActivated,
+    CanExchangeEstablishments,
+    MoneyDivided,
+)
 
 if TYPE_CHECKING:
     from .game import MachiKoroGame
@@ -44,8 +50,9 @@ class CardEffect(ABC):
     """
 
     @staticmethod
-    def _earn_money(game: MachiKoroGame, card: Card, player: Player,
-                    amount: int) -> None:
+    def _earn_money(
+        game: MachiKoroGame, card: Card, player: Player, amount: int
+    ) -> None:
         """
         Helper method to give player some money from bank.
 
@@ -65,8 +72,13 @@ class CardEffect(ABC):
         )
 
     @staticmethod
-    def _take_money(game: MachiKoroGame, card: Card, player_from: Player,
-                    player_to: Player, amount: int) -> None:
+    def _take_money(
+        game: MachiKoroGame,
+        card: Card,
+        player_from: Player,
+        player_to: Player,
+        amount: int,
+    ) -> None:
         """
         Helper method to transfer coins between players.
 
@@ -94,8 +106,9 @@ class CardEffect(ABC):
         )
 
     @abstractmethod
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         """
         Applies card effect when called (game manages the activation conditions).
 
@@ -113,10 +126,12 @@ class EarnFromBank(CardEffect):
     """
     Earn coins from bank.
     """
+
     income: int
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         amount_gain = self.income + game.get_gain_modifier(card)
         self._earn_money(game, card, owner, amount_gain)
 
@@ -126,10 +141,12 @@ class EarnFromActivePlayer(CardEffect):
     """
     Take money from player, whose turn it is currently and give them to card's owner.
     """
+
     amount: int
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         amount_owed = self.amount + game.get_gain_modifier(card)
         self._take_money(game, card, current, owner, amount_owed)
 
@@ -140,11 +157,13 @@ class EarnFromBankCombo(CardEffect):
     For COMBO cards, gives income, multiplied by number of cards of particular
     category in player's possession.
     """
+
     category: Kind
     income: int
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         amount_gain = self.income * owner.count_cards_by_category(self.category)
         self._earn_money(game, card, owner, amount_gain)
 
@@ -155,8 +174,9 @@ class ExchangeEstablishments(CardEffect):
     establishment cards with any establishment of another player.
     """
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         owner.exchange_establishments += 1
         game.emit_event(CanExchangeEstablishments(player=owner))
 
@@ -168,8 +188,9 @@ class TakeHalfIfElevenOrMore(CardEffect):
     5 would be taken, not 6.
     """
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         for opponent in game.traverse_forward_players(skipcurrent=True):
             if opponent.coins >= 11:
                 amount_taken = opponent.coins // 2
@@ -181,10 +202,12 @@ class TakeFromAllOpponents(CardEffect):
     """
     Take specific amount of money from all players and give them to owner.
     """
+
     amount: int
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         for opponent in game.traverse_forward_players(skipcurrent=True):
             self._take_money(game, card, opponent, owner, self.amount)
 
@@ -194,10 +217,12 @@ class TakeCoinForEachEstablishment(CardEffect):
     """
     Take a coin for each opponents' establishment card of particular category.
     """
+
     category: Kind
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         for opponent in game.traverse_forward_players(skipcurrent=True):
             count = opponent.count_cards_by_category(self.category)
             self._take_money(game, card, opponent, owner, count)
@@ -208,10 +233,12 @@ class TakeCoinsForEachLandmark(CardEffect):
     """
     Take specific amount of money for each opponents' landmark.
     """
+
     amount: int
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         for opponent in game.traverse_forward_players(skipcurrent=True):
             count = len(opponent.landmarks) * self.amount
             if count:
@@ -223,8 +250,9 @@ class TakeFiveCoinsIfTwoLandmarks(CardEffect):
     Private Club's effect. Takes 5 coins from each opponent with 2 landmarks.
     """
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         for opponent in game.traverse_forward_players(skipcurrent=True):
             if len(opponent.landmarks) == 2:
                 self._take_money(game, card, opponent, owner, 5)
@@ -239,21 +267,25 @@ class EvenlyDistributeCoins(CardEffect):
     all players' coin average, which is then rounded up (if necessary).
     """
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         players = len(game.players)
         total_coins = sum(
-            p.take_coins(p.coins) for p in game.traverse_forward_players())
+            p.take_coins(p.coins) for p in game.traverse_forward_players()
+        )
         divided = math.ceil(total_coins / players)  # Rounded up per rulebook
         for player in game.traverse_forward_players():
             player.earn_coins(divided)
-        game.emit_event(MoneyDivided(
-            reason=card,
-            players=players,
-            total_coins=total_coins,
-            from_bank=(divided * players) - total_coins,
-            coins=divided,
-        ))
+        game.emit_event(
+            MoneyDivided(
+                reason=card,
+                players=players,
+                total_coins=total_coins,
+                from_bank=(divided * players) - total_coins,
+                coins=divided,
+            )
+        )
 
 
 class ExtraTurn(CardEffect):
@@ -261,8 +293,9 @@ class ExtraTurn(CardEffect):
     Grant player an extra turn.
     """
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         game.emit_event(
             GetExtraTurn(
                 player=owner,
@@ -278,8 +311,9 @@ class InstaWin(CardEffect):
     Launch Pad effect - if you've built it, you instantly win.
     """
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         owner.have_launch_pad = True
 
 
@@ -289,8 +323,9 @@ class BuiltLoanOffice(CardEffect):
     builder-only effect is now active.
     """
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         if isinstance(card, Landmark):
             owner.have_loan_office = True
             game.emit_event(NewLandmarkEffectActivated(card, builder_only=True))
@@ -301,13 +336,13 @@ class PersistentEffect(CardEffect):
     """
     Activate a generic ongoing persistent effect of orange landmark cards.
     """
+
     effect: Effect
 
-    def trigger(self, game: MachiKoroGame, card: Card, owner: Player,
-                current: Player) -> None:
+    def trigger(
+        self, game: MachiKoroGame, card: Card, owner: Player, current: Player
+    ) -> None:
         if isinstance(card, Landmark):
             if self.effect not in game.active_effects:
                 game.active_effects[self.effect] = card
-                game.emit_event(
-                    NewLandmarkEffectActivated(card)
-                )
+                game.emit_event(NewLandmarkEffectActivated(card))
