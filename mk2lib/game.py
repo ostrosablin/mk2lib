@@ -565,31 +565,31 @@ class MachiKoroGame:
             self._switch_state(GameState.TURN_FINISHED)
         self.turn += 1
         current_player = self._get_current_player()
-        event = {
-            "extra": False,
-            "turn_number": self.turn,
-            "round_number": self.round,
-            "initial": 0,
-            "player": current_player,
-        }
-        if current_player.extra_turn:
-            event["extra"] = True
+        extra_turn = current_player.extra_turn
+        if extra_turn:
             current_player.end_turn()
         elif not no_advance:
             current_player.end_turn()
             self.current_player = (self.current_player + 1) % len(self.players)
             if self.current_player == 0:
                 self.round += 1
-                event["round_number"] = self.round
             current_player = self._get_current_player()
-            event["player"] = current_player
         current_player.new_turn()
+        initial_build_turns = 0
         if current_player.initial_build_turns:
-            event["initial"] = 3 - current_player.initial_build_turns + 1
-            self.emit_event(TurnBegins(**event))  # type: ignore
+            initial_build_turns = 3 - current_player.initial_build_turns + 1
+        self.emit_event(
+            TurnBegins(
+                extra=extra_turn,
+                turn_number=self.turn,
+                round_number=self.round,
+                initial=initial_build_turns,
+                player=current_player,
+            )
+        )
+        if initial_build_turns:
             self._enter_build_phase(current_player)
         else:
-            self.emit_event(TurnBegins(**event))  # type: ignore
             self._switch_state(GameState.ON_ROLL)
         self.dice = None
 
