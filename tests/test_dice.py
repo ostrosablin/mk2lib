@@ -86,14 +86,3 @@ def test_dice_roll_randomness():
         assert 1 <= dice.dice <= 6
         assert dice.dice2 is None
 
-
-def test_dice_to_emoji():
-    dice = Dice.roll()
-    emoji = dice.to_emoji()
-    assert len(emoji) == 1
-    assert emoji[0] == DICE_VALUES[dice.dice]
-    dice = Dice.roll(dual=True)
-    emoji = dice.to_emoji()
-    assert len(emoji) == 2
-    assert emoji[0] == DICE_VALUES[dice.dice]
-    assert emoji[1] == DICE_VALUES[dice.dice2]

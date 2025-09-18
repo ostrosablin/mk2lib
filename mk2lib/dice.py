@@ -26,8 +26,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from random import randint
 
-from mk2lib.const import DICE_VALUES
-
 
 @dataclass
 class Dice:
@@ -76,16 +74,6 @@ class Dice:
             dice=randint(1, 6),
             dice2=randint(1, 6) if dual else None,
         )
-
-    def to_emoji(self) -> list[str]:
-        """
-        Dice, converted into emoji.
-
-        :return: List with emojis of thrown dice.
-        """
-        if self.dual and self.dice2 is not None:
-            return [DICE_VALUES[self.dice], DICE_VALUES[self.dice2]]
-        return [DICE_VALUES[self.dice]]
 
     def serialize(self) -> dict:
         """

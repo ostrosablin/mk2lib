@@ -140,14 +140,3 @@ class GameState(IntEnum):
         if self == GameState.NOT_STARTED:
             return True
         return False
-
-
-# Dice faces (string-to-emoji mapping)
-DICE_VALUES = {
-    1: "1️⃣",
-    2: "2️⃣",
-    3: "3️⃣",
-    4: "4️⃣",
-    5: "5️⃣",
-    6: "6️⃣",
-}
