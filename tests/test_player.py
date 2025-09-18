@@ -241,6 +241,9 @@ def test_end_turn_decrements_build_turns(player):
 
 
 def test_is_player_winner(player, sample_landmarks):
+    """
+    Check that win condition registers properly.
+    """
     assert not player.is_winner()
     player.landmarks = sample_landmarks
     assert player.is_winner()

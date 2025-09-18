@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from random import shuffle
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from mk2lib.cards import Card, Establishment, Landmark
 from mk2lib.const import ActivationOrder, LandmarkKind, Kind, Effect
@@ -61,20 +61,20 @@ class Market:
         """
         Create a new Market object, clone and shuffle decks and make an initial deal.
         """
-        self.est_low = Market._make_card_deck(DECK_1_6)
-        self.est_high = Market._make_card_deck(DECK_7_12)
-        self.landmarks = Market._make_card_deck(DECK_LANDMARKS)
+        self.est_low = cast(list[Establishment], Market._make_card_deck(DECK_1_6))
+        self.est_high = cast(list[Establishment], Market._make_card_deck(DECK_7_12))
+        self.landmarks = cast(list[Landmark], Market._make_card_deck(DECK_LANDMARKS))
         if not use_promo:
             self.landmarks = list(filter(lambda c: not c.is_promo, self.landmarks))
-        self.dealt_low = {}
-        self.dealt_high = {}
-        self.dealt_landmarks = {}
+        self.dealt_low: dict[str, Establishment] = {}
+        self.dealt_high: dict[str, Establishment] = {}
+        self.dealt_landmarks: dict[str, Landmark] = {}
         self.game = game
         initial_deal = self.deal_to_market()
         self.game.emit_event(DealtCardsToMarket(initial_deal, initial=True))
 
     @staticmethod
-    def _make_card_deck(cards: list[Card]) -> list[Card]:
+    def _make_card_deck(cards: list[Establishment] | list[Landmark]) -> list[Card]:
         """
         Clone and shuffle card deck.
 
@@ -86,7 +86,7 @@ class Market:
             for _ in range(card.quantity):
                 deck.append(replace(card, quantity=1))
         shuffle(deck)
-        return deck
+        return cast(list[Card], deck)
 
     def deal_to_market(self) -> list[Card]:
         """
@@ -97,11 +97,12 @@ class Market:
         :return: List of cards that were dealt to market.
         """
         dealt = []
-        for deck, market in (
+        for deck, _market in (
             (self.est_low, self.dealt_low),
             (self.est_high, self.dealt_high),
             (self.landmarks, self.dealt_landmarks),
         ):
+            market = cast(dict[str, Card], _market)
             while deck and len(market) < 5:
                 card = deck.pop()
                 dealt.append(card)
@@ -109,7 +110,7 @@ class Market:
                     market[card.name].quantity += 1
                 else:
                     market[card.name] = card
-        return dealt
+        return cast(list[Card], dealt)
 
     def can_build(self, player: Player) -> list[Card]:
         """
@@ -125,7 +126,7 @@ class Market:
             for card in market.values():
                 if player.can_afford(card.get_real_price(self.game, player)):
                     affordable_cards.append(card)
-        return affordable_cards
+        return cast(list[Card], affordable_cards)
 
     def build_card(self, player: Player, card_name: str) -> Card | None:
         """
@@ -146,7 +147,7 @@ class Market:
             if card_name in market:
                 card = replace(market[card_name], quantity=1)
                 real_price = card.get_real_price(self.game, player)
-                if player.can_afford(real_price):
+                if player.can_afford(real_price) and real_price is not None:
                     player.spend_coins(real_price)
                     if market[card_name].quantity > 1:
                         market[card_name].quantity -= 1
@@ -164,24 +165,23 @@ class Market:
                     if dealt:
                         self.game.emit_event(DealtCardsToMarket(dealt))
                     return card
+                if real_price is None:
+                    self.game.emit_event(
+                        CardUnavailable(
+                            buyer=player,
+                            card_name=card_name,
+                            prohibited=True,
+                        )
+                    )
                 else:
-                    if real_price is None:
-                        self.game.emit_event(
-                            CardUnavailable(
-                                buyer=player,
-                                card_name=card_name,
-                                prohibited=True,
-                            )
+                    self.game.emit_event(
+                        NotEnoughMoney(
+                            buyer=player,
+                            card_name=card_name,
+                            card_price=real_price,
                         )
-                    else:
-                        self.game.emit_event(
-                            NotEnoughMoney(
-                                buyer=player,
-                                card_name=card_name,
-                                card_price=real_price,
-                            )
-                        )
-                    return None
+                    )
+                return None
         self.game.emit_event(CardUnavailable(buyer=player, card_name=card_name))
         return None
 
@@ -615,6 +615,6 @@ DECK_LANDMARKS = [
 
 # Helper lookup table of all possible cards
 ALL_CARDS = {}
-for deck in (DECK_1_6, DECK_7_12, DECK_LANDMARKS):
-    for card in deck:
-        ALL_CARDS[card.name] = card
+for _deck in (DECK_1_6, DECK_7_12, DECK_LANDMARKS):
+    for _card in _deck:
+        ALL_CARDS[_card.name] = _card

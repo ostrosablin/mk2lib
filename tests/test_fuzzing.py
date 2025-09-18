@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Machi Koro 2 auto-play game.
+Machi Koro 2 auto-play game fuzzer test.
 """
 import queue
 

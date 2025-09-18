@@ -109,11 +109,11 @@ class Player:
         :param card_name: Name of card to take.
         :return: Card, removed from player's hand.
         """
-        for idx in range(len(self.establishments)):
-            if self.establishments[idx].name == card_name:
+        for idx, establishment in enumerate(self.establishments):
+            if establishment.name == card_name:
                 return self.establishments.pop(idx)
-        for idx in range(len(self.landmarks)):
-            if self.landmarks[idx].name == card_name:
+        for idx, landmark in enumerate(self.landmarks):
+            if landmark.name == card_name:
                 return self.landmarks.pop(idx)
         raise KeyError(f'Player doesn\'t have card "{card_name}"')
 

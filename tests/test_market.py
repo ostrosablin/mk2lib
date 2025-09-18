@@ -349,6 +349,9 @@ def test_progressive_landmark_cost():
 
 
 def test_market_use_promo():
+    """
+    Check promo cards being included/excluded correctly.
+    """
     game = DummyGame()
     promo = ["city_hall", "private_club", "renovation_company"]
     market = Market(game, use_promo=False)

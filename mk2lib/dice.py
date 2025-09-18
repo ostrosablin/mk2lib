@@ -83,7 +83,7 @@ class Dice:
 
         :return: List with emojis of thrown dice.
         """
-        if self.dual:
+        if self.dual and self.dice2 is not None:
             return [DICE_VALUES[self.dice], DICE_VALUES[self.dice2]]
         return [DICE_VALUES[self.dice]]
 

@@ -27,18 +27,16 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from player import Player
-    from const import GameState
-    from mk2deck import Card, Establishment, Landmark
-    from dice import Dice
+    from .player import Player
+    from .const import GameState
+    from .mk2deck import Card, Establishment, Landmark
+    from .dice import Dice
 
 
 class Event:
     """
     Base class for all Events.
     """
-
-    pass
 
 
 @dataclass(frozen=True)
@@ -329,8 +327,6 @@ class ErrorEvent(Event):
     """
     Base class for error events.
     """
-
-    pass
 
 
 @dataclass(frozen=True)
