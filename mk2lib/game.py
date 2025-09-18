@@ -574,6 +574,7 @@ class MachiKoroGame:
         }
         if current_player.extra_turn:
             event["extra"] = True
+            current_player.end_turn()
         elif not no_advance:
             current_player.end_turn()
             self.current_player = (self.current_player + 1) % len(self.players)
