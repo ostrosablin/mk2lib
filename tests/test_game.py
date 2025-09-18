@@ -39,11 +39,7 @@ from mk2lib.events import (
     OwnerChanged,
 )
 from mk2lib.game import MachiKoroGame
-
-from mk2lib.cards import Card, Establishment, Landmark
-from mk2lib.const import Effect, GameState, INACTIVITY_TIMEOUT
-from mk2lib.game import MachiKoroGame
-from mk2lib.mk2deck import DECK_1_6, DECK_7_12, DECK_LANDMARKS
+from mk2lib.const import INACTIVITY_TIMEOUT
 
 
 @pytest.fixture
@@ -65,6 +61,7 @@ def test_kick(game: MachiKoroGame):
     """
     Test that kick works.
     """
+
     # Not existing kicker/kickee.
     assert not game.is_owner_self_or_timeout(6, 6)  # Fail-path.
     assert isinstance(game.events.get_nowait(), NotInGame)
@@ -151,6 +148,10 @@ def test_leave(game: MachiKoroGame):
 
 
 def test_cancel(game: MachiKoroGame):
+    """
+    Check that we can cancel the game.
+    """
+
     save = game.serialize()
     assert not game.cancel(6)  # Not existing player.
     assert isinstance(game.events.get_nowait(), NotInGame)

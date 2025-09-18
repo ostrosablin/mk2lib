@@ -24,7 +24,7 @@ Machi Koro 2 card effect testing.
 import pytest
 
 from mk2lib.cards import Card, Establishment, Landmark
-from mk2lib.const import Effect, GameState
+from mk2lib.const import Effect
 from mk2lib.game import MachiKoroGame
 from mk2lib.mk2deck import DECK_1_6, DECK_7_12, DECK_LANDMARKS
 

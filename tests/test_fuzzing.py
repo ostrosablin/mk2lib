@@ -21,9 +21,9 @@
 Machi Koro 2 auto-play game fuzzer test.
 """
 import queue
+import random
 
 import pytest
-import random
 
 from mk2lib.const import GameState, INACTIVITY_TIMEOUT
 from mk2lib.events import StateSwitch, CanBuild, ErrorEvent
@@ -31,6 +31,9 @@ from mk2lib.game import MachiKoroGame
 
 
 def rand_bool():
+    """
+    Generate random bool.
+    """
     return bool(random.getrandbits(1))
 
 
@@ -45,7 +48,14 @@ def game_random():
     return game
 
 
-def exchange_establishments(game, negative=False):
+def exchange_establishments(game, negative=False) -> None:
+    """
+    Exchange establishments logic.
+
+    :param game: Machi Koro 2 game instance.
+    :param negative: Boolean, whether to check negative cases.
+    :return: None.
+    """
     if rand_bool():
         if negative:
             player = random.choice(game.players)
@@ -84,6 +94,9 @@ def exchange_establishments(game, negative=False):
 
 @pytest.mark.parametrize("execution_number,", range(1000))
 def test_random_game(game_random, execution_number):
+    """
+    Run a random game with self-playing dummy agents.
+    """
     negative = bool(execution_number % 2)
     g = game_random
     if negative and len(g.players) == 1:  # Try to start 1p game.

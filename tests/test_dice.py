@@ -84,4 +84,3 @@ def test_dice_roll_randomness():
         dice = Dice.roll(dual=False)
         assert 1 <= dice.dice <= 6
         assert dice.dice2 is None
-
