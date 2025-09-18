@@ -26,7 +26,7 @@ import random
 from dataclasses import replace
 from queue import SimpleQueue
 from time import time
-from typing import Iterator
+from typing import Iterator, cast
 
 from mk2lib.const import (
     INACTIVITY_TIMEOUT,
@@ -129,7 +129,7 @@ class MachiKoroGame:
                 # wouldn't list Loan Office, as it has undefined 2nd and 3rd landmark
                 # price.
                 return False  # pragma: no cover
-            elif plr is not player and not plr.landmarks:
+            if plr is not player and not plr.landmarks:
                 # Another player doesn't have landmarks - cannot buy loan office.
                 return False
         return True
@@ -423,16 +423,18 @@ class MachiKoroGame:
         :param player: Player, whose turn it is now.
         :return: None.
         """
-        if self.dice.dual:
+        if self.dice is not None and self.dice.dual:
             card = self.active_effects.get(Effect.NO_EARN_COMPENSATION_TWO_DICE)
+            payout = 3
         else:
             card = self.active_effects.get(Effect.NO_EARN_COMPENSATION_ONE_DICE)
+            payout = 2
         if card is not None:
             self.emit_event(
                 MoneyEarned(
                     reason=card,
                     user=player,
-                    earned=player.earn_coins(3 if self.dice.dual else 2),
+                    earned=player.earn_coins(payout),
                 )
             )
 
@@ -468,6 +470,9 @@ class MachiKoroGame:
         :param player: Player, whose turn it is now.
         :return: Whether landmark effect interrupts normal turn flow.
         """
+        if self.dice is None:
+            raise ValueError("Activation of landmarks without rolling dice")
+
         if self.dice.sum == 12:
             self._on_twelve_roll(player)
         if self.dice.sum == 6:
@@ -498,6 +503,9 @@ class MachiKoroGame:
         :param player: Player, whose turn it is now.
         :return: None.
         """
+        if self.market is None:
+            raise ValueError("Entered build phase with not initialized market")
+
         if not player.initial_build_turns and player.coins == 0:
             player.earn_coins(1)
             self.emit_event(GetOneCoinBecauseHadNoMoney(player))
@@ -506,9 +514,8 @@ class MachiKoroGame:
             self._switch_state(GameState.ON_BUILD)
             self.emit_event(CanBuild(player, build_options=buildable))
             return
-        else:
-            self.emit_event(SkipBuild(player, cannot_buy=True))
-            self._switch_turn()
+        self.emit_event(SkipBuild(player, cannot_buy=True))
+        self._switch_turn()
 
     def _activate_establishments(self, roll: int) -> None:
         """
@@ -578,10 +585,10 @@ class MachiKoroGame:
         current_player.new_turn()
         if current_player.initial_build_turns:
             event["initial"] = 3 - current_player.initial_build_turns + 1
-            self.emit_event(TurnBegins(**event))
+            self.emit_event(TurnBegins(**event))  # type: ignore
             self._enter_build_phase(current_player)
         else:
-            self.emit_event(TurnBegins(**event))
+            self.emit_event(TurnBegins(**event))  # type: ignore
             self._switch_state(GameState.ON_ROLL)
         self.dice = None
 
@@ -617,6 +624,7 @@ class MachiKoroGame:
         """
         if not (player := self._get_player_object(player)):
             return False
+
         if self._expect_state_and_player(player, GameState.ON_ESTABLISHMENT_GIVE):
             if not player.has_card(card_given, only_establishments=True):
                 self.emit_event(
@@ -626,7 +634,7 @@ class MachiKoroGame:
                 )
                 return False
             opponent = next(self._traverse_backward_red())
-            given_card = player.pop_card(card_given)
+            given_card = cast(Establishment, player.pop_card(card_given))
             opponent.add_card(given_card)
             self.emit_event(
                 EstablishmentGiven(
@@ -638,6 +646,7 @@ class MachiKoroGame:
             player.give_establishment = False
             self._enter_build_phase(player)
             return True
+
         return False
 
     def dont_exchange_establishments(self, player: PlayerType = None) -> bool:
@@ -652,6 +661,7 @@ class MachiKoroGame:
         """
         if not (player := self._get_player_object(player)):
             return False
+
         if self._expect_state_and_player(player, GameState.ON_ESTABLISHMENT_EXCHANGE):
             self.emit_event(SkipExchangeEstablishments(player=player))
             player.exchange_establishments = 0  # Remaining exchanges are forfeited, too
@@ -659,6 +669,7 @@ class MachiKoroGame:
                 return True
             self._enter_build_phase(player)
             return True
+
         return False
 
     def exchange_establishments(
@@ -684,7 +695,9 @@ class MachiKoroGame:
         if player is opponent:
             self.emit_event(CannotExchangeWithSelf(player=player))
             return False
+
         if self._expect_state_and_player(player, GameState.ON_ESTABLISHMENT_EXCHANGE):
+
             if not player.has_card(card_given, only_establishments=True):
                 self.emit_event(
                     PlayerHasNoSuchCard(
@@ -699,8 +712,9 @@ class MachiKoroGame:
                     )
                 )
                 return False
-            given_card = player.pop_card(card_given)
-            taken_card = opponent.pop_card(card_taken)
+
+            given_card = cast(Establishment, player.pop_card(card_given))
+            taken_card = cast(Establishment, opponent.pop_card(card_taken))
             player.add_card(taken_card)
             opponent.add_card(given_card)
             self.emit_event(
@@ -718,6 +732,7 @@ class MachiKoroGame:
                     return True
                 self._enter_build_phase(player)
             return True
+
         return False
 
     def roll_dice(self, dual: bool = False, player: PlayerType = None) -> bool:
@@ -733,6 +748,7 @@ class MachiKoroGame:
         """
         if not (player := self._get_player_object(player)):
             return False
+
         if self._expect_state_and_player(player, GameState.ON_ROLL):
             self.dice = Dice.roll(dual)
             self.emit_event(DiceRolled(player, self.dice))
@@ -750,6 +766,7 @@ class MachiKoroGame:
                 return True
             self._enter_build_phase(player)
             return True
+
         return False
 
     def build_card(self, card_name: str | None, player: PlayerType = None) -> bool:
@@ -763,8 +780,12 @@ class MachiKoroGame:
         :param player: Player object, integer ID or None (implies current).
         :return: Boolean, indicating whether move is legal & was successfully performed.
         """
+        if self.market is None:
+            raise ValueError("Entered build phase with not initialized market")
+
         if not (player := self._get_player_object(player)):
             return False
+
         if self._expect_state_and_player(player, GameState.ON_BUILD):
             if card_name is None:
                 self.emit_event(SkipBuild(player=player, cannot_buy=False))
@@ -785,6 +806,7 @@ class MachiKoroGame:
                 if not self._check_is_game_won(player):
                     self._switch_turn()
                 return True
+
         return False
 
     def start(
@@ -805,6 +827,7 @@ class MachiKoroGame:
             return False
         if not self.is_owner_or_timeout(player):
             return False
+
         if self._expect_state(GameState.NOT_STARTED):
             if len(self.players) < 2:
                 self.emit_event(NotEnoughPlayers(player=player))
@@ -824,6 +847,7 @@ class MachiKoroGame:
             self.market = Market(self, use_promo=use_promo)
             self._switch_turn(no_advance=True)
             return True
+
         return False
 
     def join(self, player_id: int) -> bool:
@@ -850,6 +874,7 @@ class MachiKoroGame:
             self.emit_event(PlayerJoined(player=player_obj))
             return True
         self.emit_event(GameInProgress(player_id=player_id))
+
         return False
 
     def leave(self, player: PlayerType) -> bool:
@@ -942,6 +967,7 @@ class MachiKoroGame:
         if self.state.is_game_ended:
             self.emit_event(NoGameInProgress(player))
             return False
+
         self.emit_event(GameEnded(player=player, cancelled=True))
         if not self.state.is_in_lobby:
             self.emit_event(FinalScores(self.get_scores(), finished=False))
@@ -960,7 +986,7 @@ class MachiKoroGame:
             reverse=True,
         )
 
-        places = {}
+        places: dict[int, list[Player]] = {}
         place = 0
         prev_key = None
         for player in sorted_players:
@@ -976,6 +1002,10 @@ class MachiKoroGame:
     def serialize(self) -> dict:
         """
         Serialize game into a save dict.
+
+        Warning: Serialization doesn't preserve event bus state! All outstanding events
+        would be lost upon save-load cycle. Since moves are atomic, you're expected to
+        consume all events upon committing move, and call serialize() with empty queue.
 
         :return: JSON-friendly savegame.
         """
@@ -1027,5 +1057,6 @@ class MachiKoroGame:
         game.events = SimpleQueue()
         game.active_effects = {}
         for effect, card in data["active_effects"].items():
-            game.active_effects[Effect(effect)] = replace(ALL_CARDS[card], quantity=1)
+            card_obj = cast(Landmark, replace(ALL_CARDS[card], quantity=1))
+            game.active_effects[Effect(effect)] = card_obj
         return game

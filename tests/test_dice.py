@@ -22,7 +22,6 @@ Machi Koro 2 Dice rolling testing.
 """
 import pytest
 
-from mk2lib.const import DICE_VALUES
 from mk2lib.dice import Dice
 
 
